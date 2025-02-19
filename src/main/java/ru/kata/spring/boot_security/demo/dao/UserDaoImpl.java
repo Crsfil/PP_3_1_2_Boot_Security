@@ -35,4 +35,13 @@ public class UserDaoImpl implements UserDao {
     public List<User> findAll() {
         return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
     }
+    public User findByUsername(String username) {
+        try {
+            return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
