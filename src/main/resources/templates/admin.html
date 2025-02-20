@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Panel</title>
+</head>
+<body>
+<h1>Admin Panel</h1>
+<!-- Таблица всех пользователей -->
+<table>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.username}"></td>
+        <!-- Кнопки CRUD -->
+        <td>
+            <a th:href="@{/admin/edit(id=${user.id})}">Edit</a>
+            <form th:action="@{/admin/delete}" method="post">
+                <input type="hidden" name="id" th:value="${user.id}">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+</table>
+<!-- Форма добавления пользователя -->
+<form th:action="@{/admin/new}" method="post">
+    <input type="text" name="username">
+    <input type="password" name="password">
+    <button type="submit">Add User</button>
+</form>
+</body>
+</html>
