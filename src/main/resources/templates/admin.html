@@ -1,28 +1,160 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
     <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        /* Стили для таблицы */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        /* Стили для формы */
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        select {
+            height: 100px; /* Высота для множественного выбора */
+        }
+        /* Стили для кнопок */
+        button, a.button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover, a.button:hover {
+            background-color: #45a049;
+        }
+        form button {
+            width: 100%;
+            margin-top: 10px;
+        }
+        a.button.delete {
+            background-color: #f44336;
+        }
+        a.button.delete:hover {
+            background-color: #da190b;
+        }
+        /* Сообщение об ошибке */
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 <h1>Admin Panel</h1>
+<!-- Сообщение об ошибке -->
+<div th:if="${error}" class="error">
+    <p th:text="${error}"></p>
+</div>
 <!-- Таблица всех пользователей -->
 <table>
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Roles</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
     <tr th:each="user : ${users}">
         <td th:text="${user.username}"></td>
-        <!-- Кнопки CRUD -->
+        <td th:text="${user.password}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.lastName}"></td>
         <td>
-            <a th:href="@{/admin/edit(id=${user.id})}">Edit</a>
-            <form th:action="@{/admin/delete}" method="post">
+    <span th:if="${user.roles != null and !user.roles.isEmpty()}">
+        <span th:each="role, iter : ${user.roles}" th:text="${role.name} + (${iter.last} ? '' : ', ')"></span>
+    </span>
+            <span th:unless="${user.roles != null and !user.roles.isEmpty()}">No roles</span>
+        </td>
+        <td>
+            <a th:href="@{/admin/edit(id=${user.id})}" class="button">Edit</a>
+            <form th:action="@{/admin/delete}" method="post" style="display:inline;">
                 <input type="hidden" name="id" th:value="${user.id}">
-                <button type="submit">Delete</button>
+                <button type="submit" class="button delete">Delete</button>
             </form>
         </td>
     </tr>
+    </tbody>
 </table>
 <!-- Форма добавления пользователя -->
-<form th:action="@{/admin/new}" method="post">
-    <input type="text" name="username">
-    <input type="password" name="password">
+<form th:action="@{/admin/new}" method="post" th:object="${newUser}">
+    <label for="username">Username:</label>
+    <input type="text" th:field="*{username}" id="username" name="username" placeholder="Username" required>
+
+    <label for="password">Password:</label>
+    <input type="password" th:field="*{password}" id="password" name="password" placeholder="Password" required>
+
+    <label for="firstName">First Name:</label>
+    <input type="text" th:field="*{firstName}" id="firstName" name="firstName" placeholder="First Name">
+
+    <label for="lastName">Last Name:</label>
+    <input type="text" th:field="*{lastName}" id="lastName" name="lastName" placeholder="Last Name">
+
+    <label for="roleNames">Roles:</label>
+    <select multiple name="roleNames" id="roleNames">
+        <option value="ROLE_ADMIN">Admin</option>
+        <option value="ROLE_USER">User</option>
+    </select>
+
     <button type="submit">Add User</button>
 </form>
 </body>

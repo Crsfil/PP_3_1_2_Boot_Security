@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,24 +27,29 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Все админские URL
-                        .requestMatchers("/user").hasAnyRole("USER", "ADMIN") // Доступ для USER и ADMIN
-                        .requestMatchers("/login").permitAll() // Разрешить доступ к странице логина
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Страница логина
-                        .loginProcessingUrl("/login") // URL для обработки формы логина
-                        .failureUrl("/login?error") // URL при ошибке аутентификации
-//                        .successHandler(successUserHandler) // Использование кастомного обработчика успеха
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .successHandler(successUserHandler)
+                        .failureUrl("/login?error")
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/") // URL после выхода
+                        .logoutSuccessUrl("/")
                         .permitAll()
                 )
                 .userDetailsService(userDetailsService)
-                .csrf(AbstractHttpConfigurer::disable); // Отключение CSRF, если необходимо
+                .csrf(AbstractHttpConfigurer::disable);
         return http.build();
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 }
