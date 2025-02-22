@@ -1,15 +1,146 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
-    <title>Spring Security Example</title>
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Стили для боковой панели */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200px;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #e9ecef;
+        }
+        /* Основное содержимое */
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+        /* Карточка профиля */
+        .profile-card {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+            border-radius: 8px;
+        }
+        .profile-card h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        .profile-card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        .profile-card th,
+        .profile-card td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .profile-card th {
+            background-color: #f1f1f1;
+            font-weight: 600;
+            color: #555;
+        }
+        .profile-card td {
+            background-color: #fff;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
 </head>
-<body>
-<h1>User, welcome spring boot security page!</h1>
-<div sec:authorize="isAuthenticated()">
-    <h1>Hello, <span sec:authentication="name"></span>!</h1>
-    <form th:action="@{/logout}" method="post">
-        <input type="submit" value="Выйти"/>
-    </form>
+<body class="bg-light">
+<!-- Навигационная панель -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">User Profile</a>
+        <div class="navbar-text text-light ms-auto" sec:authorize="isAuthenticated()">
+            Logged as: <span sec:authentication="name"></span>
+            <span th:if="${user.roles}" th:text="' with roles: ' + ${#strings.listJoin(user.roles, ' ')}"></span>
+        </div>
+    </div>
+</nav>
+
+<!-- Боковая панель -->
+<div class="sidebar">
+    <a href="#">User</a>
+    <!-- Дополнительные пункты меню, если нужно -->
 </div>
+
+<!-- Основное содержимое -->
+<div class="main-content">
+    <div class="container mt-5" th:if="${user}">
+        <div class="profile-card">
+            <h2>About User</h2>
+            <table>
+                <tbody>
+                <tr>
+                    <th>ID</th>
+                    <td th:text="${user.id}">-</td>
+                </tr>
+                <tr>
+                    <th>First Name</th>
+                    <td th:text="${user.firstName}">-</td>
+                </tr>
+                <tr>
+                    <th>Last Name</th>
+                    <td th:text="${user.lastName}">-</td>
+                </tr>
+                <tr>
+                    <th>Username</th>
+                    <td th:text="${user.username}">-</td>
+                </tr>
+                <tr>
+                    <th>Roles</th>
+                    <td>
+                        <span th:each="role,iter : ${user.roles}"
+                              th:text="${role} + (${iter.last} ? '' : ', ')">
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="btn-container">
+                <a href="/" class="btn btn-success">Back to Home</a>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-danger">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
