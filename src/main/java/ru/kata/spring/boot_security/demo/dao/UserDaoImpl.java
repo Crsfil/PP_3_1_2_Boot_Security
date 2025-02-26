@@ -46,7 +46,7 @@ public class UserDaoImpl implements UserDao {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
-            Hibernate.initialize(user.getRoles()); // Явная инициализация коллекции
+            Hibernate.initialize(user.getRoles()); // Явная инициализация коллекции очень интересно
             return Optional.ofNullable(user);
         } catch (Exception e) {
             return Optional.empty();
