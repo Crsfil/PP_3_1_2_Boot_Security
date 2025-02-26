@@ -20,11 +20,9 @@ public class UserController {
 
     @GetMapping // URL будет /user (без дублирования)
     public String userProfile(Model model, Principal principal) {
-        User user = userService.findByUsername(principal.getName());
-        if (user == null) {
-            return "redirect:/error";
-        }
+        User user = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + principal.getName()));
         model.addAttribute("user", user);
-        return "user"; // Соответствует имени файла user-page.html
+        return "user";
     }
 }

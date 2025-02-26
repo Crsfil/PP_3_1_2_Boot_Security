@@ -10,6 +10,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User findByUsername(String username) {
+    public Optional<User> findByUsername(String username) {
         return userDao.findByUsername(username);
     }
 
