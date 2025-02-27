@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
     <title>Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -60,13 +60,13 @@
 </head>
 <body>
 <div class="sidebar">
-    <a th:href="@{/admin}" class="nav-link active">Admin</a>
-    <a th:href="@{/user}" class="nav-link">User</a>
+    <a href="/admin" class="nav-link active">Admin</a>
+    <a href="/user" class="nav-link">User</a>
 </div>
 
 <div class="content">
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div id="messageContainer"></div>
+
     <h1>Admin Panel</h1>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Users table</h4>
@@ -74,43 +74,19 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover" id="usersTable">
             <thead>
             <tr>
                 <th>ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Username</th>
-                <th>Password</th>
                 <th>Roles</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.id}"></td>
-                <td th:text="${user.firstName}"></td>
-                <td th:text="${user.lastName}"></td>
-                <td th:text="${user.username}"></td>
-                <td>*****</td> <!-- Исправлено: статический текст -->
-                <td>
-                    <span th:if="${user.roles != null and !user.roles.isEmpty()}">
-                        <span th:each="role, iter : ${user.roles}"
-                              th:text="${role.name} + (${iter.last} ? '' : ', ')"></span>
-                    </span>
-                    <span th:unless="${user.roles != null and !user.roles.isEmpty()}">No roles</span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-edit"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editUserModal"
-                            th:attr="data-bs-whatever=${user.id}">Edit</button>
-                    <button class="btn btn-sm btn-delete"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteUserModal"
-                            th:attr="data-bs-whatever=${user.id}">Delete</button>
-                </td>
-            </tr>
+            <!-- Данные будут заполнены через JS -->
             </tbody>
         </table>
     </div>
@@ -125,31 +101,28 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="/admin/new" method="post">
+                <form id="addUserForm">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username:</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <label for="addUsername" class="form-label">Username:</label>
+                        <input type="text" class="form-control" id="addUsername" required>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password:</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <label for="addPassword" class="form-label">Password:</label>
+                        <input type="password" class="form-control" id="addPassword" required>
                     </div>
                     <div class="mb-3">
-                        <label for="firstName" class="form-label">First Name:</label>
-                        <input type="text" class="form-control" id="firstName" name="firstName">
+                        <label for="addFirstName" class="form-label">First Name:</label>
+                        <input type="text" class="form-control" id="addFirstName">
                     </div>
                     <div class="mb-3">
-                        <label for="lastName" class="form-label">Last Name:</label>
-                        <input type="text" class="form-control" id="lastName" name="lastName">
+                        <label for="addLastName" class="form-label">Last Name:</label>
+                        <input type="text" class="form-control" id="addLastName">
                     </div>
                     <div class="mb-3">
-                        <label for="roleNames" class="form-label">Roles:</label>
-                        <select class="form-select" multiple name="roleNames" id="roleNames">
-                            <option value="ROLE_ADMIN">Admin</option>
-                            <option value="ROLE_USER">User</option>
-                        </select>
+                        <label for="addRoleNames" class="form-label">Roles:</label>
+                        <select class="form-select" multiple name="roleNames" id="addRoleNames"></select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add User</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser('add')">Add User</button>
                 </form>
             </div>
         </div>
@@ -165,54 +138,29 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="/admin/edit" method="post" id="editForm">
-                    <input type="hidden" name="id" id="editId">
+                <form id="editUserForm">
+                    <input type="hidden" id="editId">
                     <div class="mb-3">
                         <label for="editUsername" class="form-label">Username:</label>
-                        <input type="text" class="form-control" name="username" id="editUsername" required>
+                        <input type="text" class="form-control" id="editUsername" required>
                     </div>
                     <div class="mb-3">
                         <label for="editPassword" class="form-label">Password:</label>
-                        <input type="password" class="form-control" name="password" id="editPassword" required>
+                        <input type="password" class="form-control" id="editPassword" required>
                     </div>
                     <div class="mb-3">
                         <label for="editFirstName" class="form-label">First Name:</label>
-                        <input type="text" class="form-control" name="firstName" id="editFirstName">
+                        <input type="text" class="form-control" id="editFirstName">
                     </div>
                     <div class="mb-3">
                         <label for="editLastName" class="form-label">Last Name:</label>
-                        <input type="text" class="form-control" name="lastName" id="editLastName">
+                        <input type="text" class="form-control" id="editLastName">
                     </div>
                     <div class="mb-3">
                         <label for="editRoleNames" class="form-label">Roles:</label>
-                        <select class="form-select" multiple name="roleNames" id="editRoleNames">
-                            <option value="ROLE_ADMIN">Admin</option>
-                            <option value="ROLE_USER">User</option>
-                        </select>
+                        <select class="form-select" multiple name="roleNames" id="editRoleNames"></select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete User Modal -->
-<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this user?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <form action="/admin/delete" method="post" id="deleteForm">
-                    <input type="hidden" name="id" id="deleteId">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser('edit')">Save Changes</button>
                 </form>
             </div>
         </div>
@@ -221,33 +169,145 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const editUserModal = document.getElementById('editUserModal');
-    editUserModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const userId = button.getAttribute('data-bs-whatever');
+    let currentUser = null;
 
-        fetch('/admin/user/' + userId)
-            .then(response => response.json())
-            .then(user => {
-                document.getElementById('editId').value = user.id;
-                document.getElementById('editUsername').value = user.username;
-                document.getElementById('editPassword').value = user.password;
-                document.getElementById('editFirstName').value = user.firstName;
-                document.getElementById('editLastName').value = user.lastName;
+    // Загрузка данных при открытии страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUsers();
+        loadRoles();
+    });
 
-                const roleSelect = document.getElementById('editRoleNames');
-                Array.from(roleSelect.options).forEach(option => {
-                    option.selected = user.roles.some(role => role.name === option.value);
-                });
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/users');
+            const users = await response.json();
+            renderUsers(users);
+        } catch (error) {
+            showMessage('Error loading users: ' + error.message, 'danger');
+        }
+    }
+
+    async function loadRoles() {
+        try {
+            const response = await fetch('/api/roles');
+            const roles = await response.json();
+            populateRoleSelects(roles);
+        } catch (error) {
+            showMessage('Error loading roles: ' + error.message, 'danger');
+        }
+    }
+
+    function renderUsers(users) {
+        const tbody = document.querySelector('#usersTable tbody');
+        tbody.innerHTML = users.map(user => `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.firstName}</td>
+                <td>${user.lastName}</td>
+                <td>${user.username}</td>
+                <td>${user.roles.map(r => r.name).join(', ')}</td>
+                <td>
+                    <button class="btn btn-sm btn-edit"
+                            onclick="openEditModal(${user.id})">Edit</button>
+                    <button class="btn btn-sm btn-delete"
+                            onclick="deleteUser(${user.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function openEditModal(userId) {
+        try {
+            const response = await fetch(`/api/users/${userId}`);
+            currentUser = await response.json();
+
+            // Заполнение полей модального окна
+            document.getElementById('editId').value = currentUser.id;
+            document.getElementById('editUsername').value = currentUser.username;
+            document.getElementById('editFirstName').value = currentUser.firstName;
+            document.getElementById('editLastName').value = currentUser.lastName;
+
+            // Выбор ролей
+            const roleSelect = document.getElementById('editRoleNames');
+            Array.from(roleSelect.options).forEach(option => {
+                option.selected = currentUser.roles.some(r => r.name === option.value);
             });
-    });
 
-    const deleteUserModal = document.getElementById('deleteUserModal');
-    deleteUserModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const userId = button.getAttribute('data-bs-whatever');
-        document.getElementById('deleteId').value = userId;
-    });
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        } catch (error) {
+            showMessage('Error loading user data: ' + error.message, 'danger');
+        }
+    }
+
+    async function saveUser(formType) {
+        const isEdit = formType === 'edit';
+        const url = isEdit ? `/api/users/${currentUser.id}` : '/api/users';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const userData = {
+            username: document.getElementById(`${formType}Username`).value,
+            password: document.getElementById(`${formType}Password`).value,
+            firstName: document.getElementById(`${formType}FirstName`).value,
+            lastName: document.getElementById(`${formType}LastName`).value,
+            roles: Array.from(document.getElementById(`${formType}RoleNames`).selectedOptions)
+                .map(option => ({ name: option.value }))
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) throw new Error('Server error');
+
+            showMessage(`User ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+            loadUsers();
+            bootstrap.Modal.getInstance(document.getElementById(`${formType}UserModal`)).hide();
+        } catch (error) {
+            showMessage('Error saving user: ' + error.message, 'danger');
+        }
+    }
+
+    async function deleteUser(userId) {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Server error');
+
+            showMessage('User deleted successfully!', 'success');
+            loadUsers();
+        } catch (error) {
+            showMessage('Error deleting user: ' + error.message, 'danger');
+        }
+    }
+
+    function showMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${text}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.getElementById('messageContainer').appendChild(messageDiv);
+        setTimeout(() => messageDiv.remove(), 5000);
+    }
+
+    function populateRoleSelects(roles) {
+        const selects = document.querySelectorAll('select[name="roleNames"]');
+        selects.forEach(select => {
+            select.innerHTML = roles.map(role =>
+                `<option value="${role.name}">${role.name}</option>`
+            ).join('');
+        });
+    }
 </script>
 </body>
 </html>

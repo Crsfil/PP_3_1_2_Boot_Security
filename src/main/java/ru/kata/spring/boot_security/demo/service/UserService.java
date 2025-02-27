@@ -14,5 +14,6 @@ public interface UserService {
     void updateUser(User user);
     void deleteUser(Long id);
     User findUserById(Long id);
+    List<Role> findAllRoles();
     List<User> findAllUsers();
 }

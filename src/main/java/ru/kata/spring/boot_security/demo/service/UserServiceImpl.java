@@ -34,6 +34,13 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Role> findAllRoles() {
+        return entityManager.createQuery("FROM Role", Role.class)
+                .getResultList();
+    }
+
 
     @Override
     @Transactional
