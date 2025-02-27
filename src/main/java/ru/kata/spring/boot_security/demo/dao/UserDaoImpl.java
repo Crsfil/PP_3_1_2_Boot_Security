@@ -43,10 +43,10 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> findByUsername(String username) {
         try {
-            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+            User user = entityManager.createQuery(
+                            "SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
-            Hibernate.initialize(user.getRoles()); // Явная инициализация коллекции очень интересно
             return Optional.ofNullable(user);
         } catch (Exception e) {
             return Optional.empty();

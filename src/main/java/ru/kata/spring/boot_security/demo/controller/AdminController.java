@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.controller;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,17 +42,10 @@ public class AdminController {
             @RequestParam(value = "roleNames", required = false) String[] roleNames,
             RedirectAttributes redirectAttributes) {
 
-        try {
-            Set<Role> roles = processRoles(roleNames);
-            user.setRoles(roles);
-            userService.saveUser(user);
-            redirectAttributes.addFlashAttribute("success", "User created successfully!");
-        } catch (DataIntegrityViolationException e) {
-            redirectAttributes.addFlashAttribute("error", "Username already exists!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error creating user: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("newUser", user);
-        }
+        Set<Role> roles = processRoles(roleNames);
+        user.setRoles(roles);
+        userService.saveUser(user);
+        redirectAttributes.addFlashAttribute("success", "User created successfully!");
 
         return "redirect:/admin";
     }
@@ -98,14 +90,12 @@ public class AdminController {
             }
         }
 
-        // Default role if none selected
         if (roles.isEmpty()) {
             Role defaultRole = userService.findRoleByName("ROLE_USER");
             if (defaultRole != null) {
                 roles.add(defaultRole);
             }
         }
-
         return roles;
     }
 }
