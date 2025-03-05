@@ -55,27 +55,16 @@ public class AdminController {
             @ModelAttribute User user,
             @RequestParam(value = "roleNames", required = false) String[] roleNames,
             RedirectAttributes redirectAttributes) {
-
-        try {
             Set<Role> roles = processRoles(roleNames);
             user.setRoles(roles);
             userService.updateUser(user);
             redirectAttributes.addFlashAttribute("success", "User updated successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error updating user: " + e.getMessage());
-        }
-
         return "redirect:/admin";
     }
 
     @PostMapping("/delete")
     public String deleteUser(@RequestParam("id") Long id, RedirectAttributes redirectAttributes) {
-        try {
             userService.deleteUser(id);
-            redirectAttributes.addFlashAttribute("success", "User deleted successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error deleting user: " + e.getMessage());
-        }
         return "redirect:/admin";
     }
 
