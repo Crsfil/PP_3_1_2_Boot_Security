@@ -1,5 +1,4 @@
 package ru.kata.spring.boot_security.demo.dao;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.User;
@@ -42,14 +41,10 @@ public class UserDaoImpl implements UserDao {
     @Transactional(readOnly = true)
     @Override
     public Optional<User> findByUsername(String username) {
-        try {
-            User user = entityManager.createQuery(
-                            "SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username", User.class)
-                    .setParameter("username", username)
-                    .getSingleResult();
-            return Optional.ofNullable(user);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return entityManager.createQuery(
+                        "SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username", User.class)
+                .setParameter("username", username)
+                .getResultStream()
+                .findFirst();
     }
 }
